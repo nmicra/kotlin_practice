@@ -23,11 +23,11 @@ fun main(){
 
     // Initialize consumers
     for (i in 0 until NUM_OF_EXECUTORS) {
-        GlobalScope.launch { consumer(i,workLoad[i] ) }
+        GlobalScope.launch(Dispatchers.IO) { consumer(i,workLoad[i] ) }
     }
 
     for (i in 1..100){
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.IO) {
             val empl  = Employee("empId${ i.rem(NUM_OF_EXECUTORS)}", i)
 //            val chnlNr = BigInteger(empl.id.toByteArray()).mod(BigInteger.valueOf(NUM_OF_EXECUTORS.toLong())).toInt()
             val chnlNr = asciiSum(empl.id).mod(NUM_OF_EXECUTORS)
