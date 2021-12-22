@@ -16,24 +16,21 @@ import java.math.BigInteger
 
 const val NUM_OF_EXECUTORS = 10
 data class Employee(val id : String, val count : Int)
-val workLoad : MutableList<Channel<Employee>> = mutableListOf()
+val workLoad : MutableList<Channel<Employee>> = MutableList(NUM_OF_EXECUTORS) { Channel() }
+
 
 fun main(){
 
-    // Initialize channels
-    for (i in 0..NUM_OF_EXECUTORS) {
-        workLoad.add(Channel())
-    }
-
     // Initialize consumers
-    for (i in 0..NUM_OF_EXECUTORS) {
+    for (i in 0 until NUM_OF_EXECUTORS) {
         GlobalScope.launch { consumer(i,workLoad[i] ) }
     }
 
     for (i in 1..100){
         GlobalScope.launch {
             val empl  = Employee("empId${ i.rem(NUM_OF_EXECUTORS)}", i)
-            val chnlNr = BigInteger(empl.id.toByteArray()).mod(BigInteger.valueOf(NUM_OF_EXECUTORS.toLong())).toInt()
+//            val chnlNr = BigInteger(empl.id.toByteArray()).mod(BigInteger.valueOf(NUM_OF_EXECUTORS.toLong())).toInt()
+            val chnlNr = asciiSum(empl.id).mod(NUM_OF_EXECUTORS)
             workLoad[chnlNr].send(empl)
         }
     }
@@ -42,6 +39,7 @@ fun main(){
 }
 
 
+fun asciiSum(str : String) : Int = str.toCharArray().sumOf { it.code }
 
 suspend fun consumer(consumerId: Int, channel: Channel<Employee>) {
     for (wrkr in channel) {
